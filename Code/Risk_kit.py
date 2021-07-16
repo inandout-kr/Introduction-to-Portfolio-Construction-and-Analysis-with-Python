@@ -84,3 +84,44 @@ def is_normal(r, level=0.01):
         statistic, p_value = scipy.stats.jarque_bera(r)
         return p_value > level
     
+import numpy as np
+def var_historic(r, level=5):
+    """
+    VaR Historic
+    """
+    if isinstance(r, pd.DataFrame): # if r이 DataFrame이면, 
+        return r.aggregate(var_historic, level=level)  # DataFrame의 모든 column에 var_historic function을 호출
+    elif isinstance(r, pd.Series):
+        return -np.percentile(r, level)
+    else:
+        raise TypeError("Expected r to be a Series or DataFrame")
+
+from scipy.stats import norm
+def var_gaussian(r, level=5):
+    """
+    Returns the Parametric Gauusian VaR of a Series or DataFrame
+    """
+    # compute the Z score assuming it was Gaussian
+    z = norm.ppf(level/100)
+    return -(r.mean() + z * r.std(ddof=0))
+
+from scipy.stats import norm
+def var_gaussian(r, level=5, modified=False):
+    """
+    Returns the Parametric Gauusian VaR of a Series or DataFrame
+    If "modified" is True, then the modified VaR is returned,
+    using the Cornish-Fisher modification
+    """
+    # compute the Z score assuming it was Gaussian
+    z = norm.ppf(level/100)
+    if modified:
+        # modify the Z score based on observed skewness and kurtosis
+        s = skewness(r)
+        k = kurtosis(r)
+        z = (z +
+                (z**2 - 1)*s/6 +
+                (z**3 -3*z)*(k-3)/24 -
+                (2*z**3 - 5*z)*(s**2)/36
+            )
+        
+    return -(r.mean() + z*r.std(ddof=0))
