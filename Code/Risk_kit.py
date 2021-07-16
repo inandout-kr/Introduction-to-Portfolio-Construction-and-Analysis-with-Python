@@ -39,6 +39,14 @@ def get_hfi_returns():
     hfi.index = hfi.index.to_period('M')
     return hfi
 
+def semideviation(r):
+    """
+    Returns the semideviation aka negative semideviation of r
+    r must be a Series or a DataFrame, else raises a TypeError
+    """
+    is_negative = r < 0
+    return r[is_negative].std(ddof=0)
+
 def skewness(r):
     """
     Alternative to scipy.stats.skew()
@@ -75,3 +83,4 @@ def is_normal(r, level=0.01):
     else:
         statistic, p_value = scipy.stats.jarque_bera(r)
         return p_value > level
+    
