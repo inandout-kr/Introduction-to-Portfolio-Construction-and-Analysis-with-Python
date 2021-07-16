@@ -125,3 +125,15 @@ def var_gaussian(r, level=5, modified=False):
             )
         
     return -(r.mean() + z*r.std(ddof=0))
+
+def cvar_historic(r, level=5):
+    """
+    Computes the Conditional VaR of Series or DataFrame
+    """
+    if isinstance(r, pd.Series):
+        is_beyond = r <= -var_historic(r, level=level)
+        return -r[is_beyond].mean()
+    elif isinstance(r, pd.DataFrame):
+        return r.aggregate(cvar_historic, level=level)
+    else:
+        raise TypeError("Expected r to be a Series or DataFrame")
