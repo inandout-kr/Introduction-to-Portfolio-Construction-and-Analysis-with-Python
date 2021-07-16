@@ -28,3 +28,13 @@ def get_ffme_returns():
     rets.index = pd.to_datetime(rets.index,
                                 format="%Y%m").to_period('M')
     return rets
+
+def get_hfi_returns():
+    """
+    Load and format the EDHEC Hedge Fund Index Returns
+    """
+    hfi = pd.read_csv("C:/Users/USER/coursera_py/Introduction to Portfolio Construction and Analysis with Python/data/edhec-hedgefundindices.csv",
+                      header=0, index_col=0, parse_dates=True)
+    hfi = hfi/100
+    hfi.index = hfi.index.to_period('M')
+    return hfi
